@@ -1,6 +1,7 @@
 package com.gh.greendaodemo.table;
 
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Property;
 
 import java.lang.annotation.Retention;
@@ -8,6 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
 
 import androidx.annotation.IntDef;
+
 import org.greenrobot.greendao.annotation.Generated;
 
 /**
@@ -20,8 +22,8 @@ public class TeacherInfoTable {
     public final static int CHINESE = 0;
     public final static int MATH = 1;
     public final static int ENGLISH = 2;
-
-    private long id;
+    @Id(autoincrement = true)
+    private Long id;
     private String teacherName;
 
     /**
@@ -40,8 +42,8 @@ public class TeacherInfoTable {
     @Property(nameInDb = "teach_type")
     private int teachType;
 
-    @Generated(hash = 387383680)
-    public TeacherInfoTable(long id, String teacherName, int teachType) {
+    @Generated(hash = 1995732777)
+    public TeacherInfoTable(Long id, String teacherName, int teachType) {
         this.id = id;
         this.teacherName = teacherName;
         this.teachType = teachType;
@@ -51,12 +53,8 @@ public class TeacherInfoTable {
     public TeacherInfoTable() {
     }
 
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+    public Long getId() {
+        return id;
     }
 
     public String getTeacherName() {
@@ -73,5 +71,9 @@ public class TeacherInfoTable {
 
     public void setTeachType(int teachType) {
         this.teachType = teachType;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

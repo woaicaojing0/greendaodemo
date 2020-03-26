@@ -15,7 +15,7 @@ import com.gh.greendaodemo.table.TeacherInfoTable;
 /** 
  * DAO for table "teacher_info".
 */
-public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
+public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Long> {
 
     public static final String TABLENAME = "teacher_info";
 
@@ -24,7 +24,7 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
      * Can be used for QueryBuilder and for referencing column names.
      */
     public static class Properties {
-        public final static Property Id = new Property(0, long.class, "id", false, "ID");
+        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property TeacherName = new Property(1, String.class, "teacherName", false, "TEACHER_NAME");
         public final static Property TeachType = new Property(2, int.class, "teachType", false, "teach_type");
     }
@@ -42,7 +42,7 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
     public static void createTable(Database db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"teacher_info\" (" + //
-                "\"ID\" INTEGER NOT NULL ," + // 0: id
+                "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"TEACHER_NAME\" TEXT," + // 1: teacherName
                 "\"teach_type\" INTEGER NOT NULL );"); // 2: teachType
     }
@@ -56,7 +56,11 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
     @Override
     protected final void bindValues(DatabaseStatement stmt, TeacherInfoTable entity) {
         stmt.clearBindings();
-        stmt.bindLong(1, entity.getId());
+ 
+        Long id = entity.getId();
+        if (id != null) {
+            stmt.bindLong(1, id);
+        }
  
         String teacherName = entity.getTeacherName();
         if (teacherName != null) {
@@ -68,7 +72,11 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
     @Override
     protected final void bindValues(SQLiteStatement stmt, TeacherInfoTable entity) {
         stmt.clearBindings();
-        stmt.bindLong(1, entity.getId());
+ 
+        Long id = entity.getId();
+        if (id != null) {
+            stmt.bindLong(1, id);
+        }
  
         String teacherName = entity.getTeacherName();
         if (teacherName != null) {
@@ -78,14 +86,14 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
     }
 
     @Override
-    public Void readKey(Cursor cursor, int offset) {
-        return null;
+    public Long readKey(Cursor cursor, int offset) {
+        return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
     }    
 
     @Override
     public TeacherInfoTable readEntity(Cursor cursor, int offset) {
         TeacherInfoTable entity = new TeacherInfoTable( //
-            cursor.getLong(offset + 0), // id
+            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // teacherName
             cursor.getInt(offset + 2) // teachType
         );
@@ -94,26 +102,29 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Void> {
      
     @Override
     public void readEntity(Cursor cursor, TeacherInfoTable entity, int offset) {
-        entity.setId(cursor.getLong(offset + 0));
+        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setTeacherName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setTeachType(cursor.getInt(offset + 2));
      }
     
     @Override
-    protected final Void updateKeyAfterInsert(TeacherInfoTable entity, long rowId) {
-        // Unsupported or missing PK type
-        return null;
+    protected final Long updateKeyAfterInsert(TeacherInfoTable entity, long rowId) {
+        entity.setId(rowId);
+        return rowId;
     }
     
     @Override
-    public Void getKey(TeacherInfoTable entity) {
-        return null;
+    public Long getKey(TeacherInfoTable entity) {
+        if(entity != null) {
+            return entity.getId();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public boolean hasKey(TeacherInfoTable entity) {
-        // TODO
-        return false;
+        return entity.getId() != null;
     }
 
     @Override

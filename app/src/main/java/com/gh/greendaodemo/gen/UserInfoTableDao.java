@@ -24,7 +24,7 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
      * Can be used for QueryBuilder and for referencing column names.
      */
     public static class Properties {
-        public final static Property Id = new Property(0, long.class, "id", true, "_id");
+        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property UserNumber = new Property(1, String.class, "userNumber", false, "user_number");
         public final static Property UserName = new Property(2, String.class, "userName", false, "USER_NAME");
         public final static Property UserAge = new Property(3, String.class, "userAge", false, "USER_AGE");
@@ -44,8 +44,8 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
     public static void createTable(Database db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"user_info\" (" + //
-                "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ," + // 0: id
-                "\"user_number\" TEXT UNIQUE ," + // 1: userNumber
+                "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
+                "\"user_number\" TEXT," + // 1: userNumber
                 "\"USER_NAME\" TEXT," + // 2: userName
                 "\"USER_AGE\" TEXT," + // 3: userAge
                 "\"LEVEL\" TEXT);"); // 4: level
@@ -60,7 +60,11 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
     @Override
     protected final void bindValues(DatabaseStatement stmt, UserInfoTable entity) {
         stmt.clearBindings();
-        stmt.bindLong(1, entity.getId());
+ 
+        Long id = entity.getId();
+        if (id != null) {
+            stmt.bindLong(1, id);
+        }
  
         String userNumber = entity.getUserNumber();
         if (userNumber != null) {
@@ -86,7 +90,11 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
     @Override
     protected final void bindValues(SQLiteStatement stmt, UserInfoTable entity) {
         stmt.clearBindings();
-        stmt.bindLong(1, entity.getId());
+ 
+        Long id = entity.getId();
+        if (id != null) {
+            stmt.bindLong(1, id);
+        }
  
         String userNumber = entity.getUserNumber();
         if (userNumber != null) {
@@ -111,13 +119,13 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
 
     @Override
     public Long readKey(Cursor cursor, int offset) {
-        return cursor.getLong(offset + 0);
+        return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
     }    
 
     @Override
     public UserInfoTable readEntity(Cursor cursor, int offset) {
         UserInfoTable entity = new UserInfoTable( //
-            cursor.getLong(offset + 0), // id
+            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // userNumber
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // userName
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // userAge
@@ -128,7 +136,7 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
      
     @Override
     public void readEntity(Cursor cursor, UserInfoTable entity, int offset) {
-        entity.setId(cursor.getLong(offset + 0));
+        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setUserNumber(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setUserName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setUserAge(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
@@ -152,7 +160,7 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
 
     @Override
     public boolean hasKey(UserInfoTable entity) {
-        throw new UnsupportedOperationException("Unsupported for entities with a non-null key");
+        return entity.getId() != null;
     }
 
     @Override
