@@ -1,28 +1,27 @@
 package com.gh.greendaodemo.base;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
+import com.gh.greendaodemo.gen.DaoMaster;
 import com.gh.greendaodemo.gen.DaoSession;
 
+import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.QueryBuilder;
-
-import java.io.File;
-import java.io.IOException;
 
 
 /**
- * @author yfjin
- * @date 2018/9/27
+ * @author cj
+ * 使用说明：先在App中init（）。然后在需要使用的地方 DB
  */
-
 public class DbHelper {
 
+    private static final String DEFAULT_DATABASE_NAME = "Database.db";
 
     private static DbHelper instance;
 
-    public static DbHelper instance() {
+    private DaoSession mDaoSession;
+
+    public static DbHelper getInstance() {
         if (null == instance) {
             throw new NullPointerException("DbHelper未初始化");
         }
@@ -30,16 +29,54 @@ public class DbHelper {
     }
 
 
-    private DaoSession mDaoSession;
-
     /**
-     * 设置greenDao
+     * 初始化，默认的数据名
      */
     public static void init(Context context) {
         if (null == instance) {
-            instance = new DbHelper(context);
+            instance = new DbHelper(context, DEFAULT_DATABASE_NAME);
         }
     }
+
+    /**
+     * 初始化，指定的数据库名
+     */
+    public static void init(Context context, String dbName) {
+        if (null == instance) {
+            instance = new DbHelper(context, dbName);
+        }
+    }
+    /**
+     * 是否加密
+     */
+    public static boolean ENCRYPTED = true;
+    private static final String PASSWORD = "123456";
+    /**
+     * 初始化，指定的数据库名是否需要加密
+     */
+    public static void init(Context context, String dbName, boolean needEncrypted) {
+        if (null == instance) {
+            ENCRYPTED = needEncrypted;
+            instance = new DbHelper(context, dbName);
+        }
+    }
+
+    private DbHelper(Context context, String dbName) {
+
+        MyDaoMaster helper = new MyDaoMaster(context, dbName, null);
+        Database db;
+        if (ENCRYPTED) {
+            db = helper.getEncryptedWritableDb(PASSWORD);
+        } else {
+            db = helper.getWritableDb();
+        }
+        DaoMaster daoMaster = new DaoMaster(db);
+        mDaoSession = daoMaster.newSession();
+        //sql日志
+        QueryBuilder.LOG_SQL = true;
+        QueryBuilder.LOG_VALUES = true;
+    }
+
 
     /**
      * 设置greenDao
@@ -47,37 +84,6 @@ public class DbHelper {
     public static void clear() {
         instance = null;
     }
-
-
-    private DbHelper(Context context) {
-        String path = context.getFilesDir().getPath() + "/els.sqlite";
-        Log.i("database", "path:" + path);
-        File dbFile = new File(path);
-        if (dbFile == null || !dbFile.exists()) {
-            try {
-                dbFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        String filePath = dbFile.getAbsolutePath();
-        MyDaoMaster.DevOpenHelper helper = null;
-//        helper=new DaoMaster.DevOpenHelper(
-//                context
-//                , filePath
-//                , null
-//        );
-        helper = new MyDaoMaster.Helper(context, filePath, null);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        MyDaoMaster daoMaster = new MyDaoMaster(db);
-        mDaoSession = daoMaster.newSession();
-        //sql日志
-        QueryBuilder.LOG_SQL = true;
-        QueryBuilder.LOG_VALUES = true;
-    }
-
     public DaoSession getDaoSession() {
         return mDaoSession;
     }

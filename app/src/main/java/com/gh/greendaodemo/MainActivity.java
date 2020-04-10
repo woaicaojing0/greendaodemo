@@ -10,8 +10,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.gh.greendaodemo.base.DbHelper;
 import com.gh.greendaodemo.gen.DaoMaster;
 import com.gh.greendaodemo.gen.DaoSession;
+import com.gh.greendaodemo.gen.TeacherInfoTableDao;
+import com.gh.greendaodemo.gen.TeacherUserMergeDao;
+import com.gh.greendaodemo.table.TeacherInfoTable;
+import com.gh.greendaodemo.table.TeacherUserMerge;
 import com.gh.greendaodemo.table.UserInfoTable;
 import com.google.gson.Gson;
 
@@ -26,9 +31,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Button btnSelect, btnAdd, btnUpdate, btnDelete;
     private TextView tvContent;
-    private SQLiteDatabase db;
-    private DaoMaster mDaoMaster;
-    private DaoSession mDaoSession;
     private static final String TAG = "MainActivity";
     Gson gson = new Gson();
 
@@ -45,17 +47,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnAdd.setOnClickListener(this);
         btnUpdate.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
-        // 通过 DaoMaster 的内部类 DevOpenHelper，你可以得到一个便利的 SQLiteOpenHelper 对象。
-        // 可能你已经注意到了，你并不需要去编写「CREATE TABLE」这样的 SQL 语句，因为 greenDAO 已经帮你做了。
-        // 注意：默认的 DaoMaster.DevOpenHelper 会在数据库升级时，删除所有的表，意味着这将导致数据的丢失。
-        // 所以，在正式的项目中，你还应该做一层封装，来实现数据库的安全升级。
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "test.db");
-        db = helper.getWritableDatabase();
-        mDaoMaster = new DaoMaster(db);
-        mDaoSession = mDaoMaster.newSession();
-        //sql日志
-        QueryBuilder.LOG_SQL = true;
-        QueryBuilder.LOG_VALUES = true;
 
     }
 
@@ -63,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_select:
-                selectAll();
+                selectOne();
                 break;
             case R.id.btn_update:
                 break;
@@ -82,12 +73,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         userInfoTable.setUserAge("16");
         userInfoTable.setLevel("3");
         userInfoTable.setUserNumber("10086");
-        long i = mDaoSession.getUserInfoTableDao().insert(userInfoTable);
+        long i = DbHelper.getInstance().getDaoSession().getUserInfoTableDao().insert(userInfoTable);
+        UserInfoTable userInfoTable2 = new UserInfoTable();
+        userInfoTable2.setUserName("李四");
+        userInfoTable2.setUserAge("18");
+        userInfoTable2.setLevel("4");
+        userInfoTable2.setUserNumber("10087");
+        long i2 = DbHelper.getInstance().getDaoSession().getUserInfoTableDao().insert(userInfoTable2);
         Log.v(TAG, "新增===========================>" + i + " 条");
+
+
+        TeacherInfoTable teacherInfoTable = new TeacherInfoTable();
+        teacherInfoTable.setTeacherName("张三（老师）");
+        teacherInfoTable.setTeachType(TeacherInfoTable.CHINESE);
+        DbHelper.getInstance().getDaoSession().getTeacherInfoTableDao().insert(teacherInfoTable);
+        TeacherInfoTable teacherInfoTable2 = new TeacherInfoTable();
+        teacherInfoTable2.setTeacherName("李四（老师）");
+        teacherInfoTable2.setTeachType(TeacherInfoTable.ENGLISH);
+        DbHelper.getInstance().getDaoSession().getTeacherInfoTableDao().insert(teacherInfoTable2);
+        Log.v(TAG, "新增===========================>" + i2 + " 条");
+
+
+        TeacherUserMerge userMerge = new TeacherUserMerge();
+        userMerge.setUserId(userInfoTable.getId());
+        userMerge.setTeacherId(teacherInfoTable.getId());
+        DbHelper.getInstance().getDaoSession().getTeacherUserMergeDao().insert(userMerge);
+
+        TeacherUserMerge userMerge2 = new TeacherUserMerge();
+        userMerge.setUserId(userInfoTable.getId());
+        userMerge.setTeacherId(teacherInfoTable2.getId());
+        DbHelper.getInstance().getDaoSession().getTeacherUserMergeDao().insert(userMerge2);
+
+        TeacherUserMerge userMerge3 = new TeacherUserMerge();
+        userMerge3.setUserId(userInfoTable2.getId());
+        userMerge3.setTeacherId(teacherInfoTable.getId());
+        DbHelper.getInstance().getDaoSession().getTeacherUserMergeDao().insert(userMerge3);
     }
 
     private void selectAll() {
-        List<UserInfoTable> userInfoTableList = mDaoSession.getUserInfoTableDao().loadAll();
+        List<UserInfoTable> userInfoTableList = DbHelper.getInstance().getDaoSession().getUserInfoTableDao().loadAll();
         tvContent.setText(gson.toJson(userInfoTableList));
+    }
+
+    private void selectOne() {
+        QueryBuilder<TeacherInfoTable> queryBuilder = DbHelper.getInstance().getDaoSession().getTeacherInfoTableDao().queryBuilder();
+//        queryBuilder.join(TeacherUserMerge.class, TeacherUserMergeDao.Properties.TeacherId).where(
+//                        TeacherUserMergeDao.Properties.UserId.eq(2));
+        queryBuilder.join(TeacherInfoTableDao.Properties.Id, TeacherUserMerge.class).where(
+                TeacherUserMergeDao.Properties.UserId.eq(2));
+        queryBuilder.build().list();
+
+
+        QueryBuilder<TeacherInfoTable> queryBuilder2 = DbHelper.getInstance().getDaoSession().getTeacherInfoTableDao().queryBuilder();
+//        queryBuilder.join(TeacherUserMerge.class, TeacherUserMergeDao.Properties.TeacherId).where(
+//                        TeacherUserMergeDao.Properties.UserId.eq(2));
+        queryBuilder2.join(TeacherInfoTableDao.Properties.Id, TeacherUserMerge.class, TeacherUserMergeDao.Properties.TeacherId).where(
+                TeacherUserMergeDao.Properties.UserId.eq(2));
+        queryBuilder2.build().list();
     }
 }

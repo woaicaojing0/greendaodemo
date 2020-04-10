@@ -25,7 +25,7 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Long> {
      */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property TeacherName = new Property(1, String.class, "teacherName", false, "TEACHER_NAME");
+        public final static Property TeacherName = new Property(1, String.class, "teacherName", false, "teacher_name");
         public final static Property TeachType = new Property(2, int.class, "teachType", false, "teach_type");
     }
 
@@ -43,7 +43,7 @@ public class TeacherInfoTableDao extends AbstractDao<TeacherInfoTable, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"teacher_info\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
-                "\"TEACHER_NAME\" TEXT," + // 1: teacherName
+                "\"teacher_name\" TEXT," + // 1: teacherName
                 "\"teach_type\" INTEGER NOT NULL );"); // 2: teachType
     }
 

@@ -15,12 +15,15 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            resValue("string", "PORT_NUMBER", "8081")
+        }
     }
 }
 
 greendao {
     //如果扩列了，或者修改表结构之类的，记得schemaVersion+1
-    schemaVersion 1
+    schemaVersion 2
     //设置DaoMaster、DaoSession、Dao包名，也就是要放置这些类的包的全路径。(此路径下自动生成一些dao文件。)
     daoPackage 'com.gh.greendaodemo.gen'
     //设置DaoMaster、DaoSession、Dao目
@@ -37,4 +40,10 @@ dependencies {
     // 添加库
     implementation 'org.greenrobot:greendao:3.2.2'
     implementation 'com.google.code.gson:gson:2.8.5'
+    //greenDao升级工具类
+    implementation 'io.github.yuweiguocn:GreenDaoUpgradeHelper:v2.2.1'
+    //greenDao 调试工具
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
+    //greenDao加密工具
+    implementation 'net.zetetic:android-database-sqlcipher:3.5.7'
 }

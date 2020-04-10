@@ -26,9 +26,9 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property UserNumber = new Property(1, String.class, "userNumber", false, "user_number");
-        public final static Property UserName = new Property(2, String.class, "userName", false, "USER_NAME");
-        public final static Property UserAge = new Property(3, String.class, "userAge", false, "USER_AGE");
-        public final static Property Level = new Property(4, String.class, "level", false, "LEVEL");
+        public final static Property UserName = new Property(2, String.class, "userName", false, "user_name");
+        public final static Property UserAge = new Property(3, String.class, "userAge", false, "user_age");
+        public final static Property Level = new Property(4, String.class, "level", false, "level");
     }
 
 
@@ -46,9 +46,9 @@ public class UserInfoTableDao extends AbstractDao<UserInfoTable, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"user_info\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"user_number\" TEXT," + // 1: userNumber
-                "\"USER_NAME\" TEXT," + // 2: userName
-                "\"USER_AGE\" TEXT," + // 3: userAge
-                "\"LEVEL\" TEXT);"); // 4: level
+                "\"user_name\" TEXT," + // 2: userName
+                "\"user_age\" TEXT," + // 3: userAge
+                "\"level\" TEXT);"); // 4: level
     }
 
     /** Drops the underlying database table. */

@@ -24,6 +24,7 @@ public class TeacherInfoTable {
     public final static int ENGLISH = 2;
     @Id(autoincrement = true)
     private Long id;
+    @Property(nameInDb = "teacher_name")
     private String teacherName;
 
     /**
